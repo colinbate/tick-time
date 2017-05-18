@@ -1,0 +1,33 @@
+{
+  "name": "tick-time",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=6"
+  },
+  "eslint": {
+    "parserOptions": {
+      "ecmaVersion": 6
+    },
+    "env": {
+      "node": true
+    },
+    "extends": "eslint:recommended"
+  },
+  "keywords": [
+    "time",
+    "ticks",
+    "tick",
+    ".NET",
+    "convert"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "nano-seconds": "^1.1.0"
+  }
+}
