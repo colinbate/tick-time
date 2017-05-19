@@ -16,8 +16,8 @@ function toString() {
   return `${this[0]}${pad}${us}`;
 }
 
-function toMsTicks([secs, ticks]) {
-  const tarr = [secs + SECONDS_TO_EPOCH, ticks];
+function toTickObj([secs, ticks]) {
+  const tarr = [secs, ticks];
   Object.defineProperty(tarr, 'toString', {
     value: toString
   });
@@ -25,8 +25,11 @@ function toMsTicks([secs, ticks]) {
 }
 
 function tsToArray(ts) {
-  return [Math.trunc(ts / MS_PER_SEC), ~~(ts % MS_PER_SEC) * TICKS_PER_MS];
+  const tickTs = ts + (SECONDS_TO_EPOCH * MS_PER_SEC);
+  return [Math.trunc(tickTs / MS_PER_SEC), ~~(tickTs % MS_PER_SEC) * TICKS_PER_MS];
 }
+
+
 
 function rollOver(tickArr, overflow) {
   tickArr[1] += overflow;
@@ -60,7 +63,7 @@ function at(...args) {
   if (overflow !== 0) {
     rollOver(arr, overflow);
   }
-  return toMsTicks(arr);
+  return toTickObj(arr);
 }
 
 function from(dtObj) {
@@ -72,7 +75,10 @@ function from(dtObj) {
     throw new Error('This date is out of range of standard .NET DateTime(Offset)');
   }
   const arr = tsToArray(point);
-  return toMsTicks(arr);
+  if (dtObj.getTicks) {
+    arr[1] += dtObj.getTicks();
+  }
+  return toTickObj(arr);
 }
 
 function to(ticks) {
@@ -98,7 +104,7 @@ function to(ticks) {
 function now() {
   const [secs, ns] = nano.now();
   // ~~ is fast truncation for numbers which don't exceed 32 bits
-  return toMsTicks([secs, ~~(ns / NS_PER_TICK)]);
+  return toTickObj([secs + SECONDS_TO_EPOCH, ~~(ns / NS_PER_TICK)]);
 }
 
 module.exports = {
