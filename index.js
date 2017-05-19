@@ -47,8 +47,6 @@ function at(...args) {
     overflow = args[6] % TICKS_PER_MS;
     args[6] = ms;
   }
-  console.log(`===
-${ms} -- ${overflow}`);
   let point = Date.UTC(...args);
   if (point < MIN_TS || point > MAX_TS) {
     throw new Error('This date is out of range of standard .NET DateTime(Offset)');
@@ -58,13 +56,10 @@ ${ms} -- ${overflow}`);
     pdate.setUTCFullYear(args[0]);
     point = pdate.getTime();
   }
-  console.log(point);
   const arr = tsToArray(point);
-  console.log(arr);
   if (overflow !== 0) {
     rollOver(arr, overflow);
   }
-  console.log(arr);
   return toMsTicks(arr);
 }
 
@@ -80,18 +75,35 @@ function from(dtObj) {
   return toMsTicks(arr);
 }
 
+function to(ticks) {
+  let ts, extra;
+  if (Array.isArray(ticks)) {
+    ts = ticks[0] * MS_PER_SEC + Math.trunc(ticks[1] / TICKS_PER_MS);
+    extra = ticks[1] % TICKS_PER_MS;
+  } else {
+    if (ticks.length <= 4) {
+      ts = 0;
+    } else {
+      ts = parseInt(ticks.slice(0, -4), 10);
+    }
+    extra = parseInt(ticks.slice(-4), 10);
+  }
+  const dateObj = new Date(ts - (SECONDS_TO_EPOCH * MS_PER_SEC));
+  Object.defineProperty(dateObj, 'getTicks', {
+    value: () => extra
+  });
+  return dateObj;
+}
+
 function now() {
   const [secs, ns] = nano.now();
   // ~~ is fast truncation for numbers which don't exceed 32 bits
   return toMsTicks([secs, ~~(ns / NS_PER_TICK)]);
 }
 
-console.log(at(1, 0).toString());
-
-console.log(at(9999, 11, 31, 23, 59, 59, -10000400).toString());
-
 module.exports = {
-  now,
-  at,
-  from
+  ticksNow: now,
+  ticksAt: at,
+  ticksFromDate: from,
+  ticksToDate: to
 };
