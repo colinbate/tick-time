@@ -96,7 +96,7 @@ function to(ticks) {
   }
   const dateObj = new Date(ts - (SECONDS_TO_EPOCH * MS_PER_SEC));
   Object.defineProperty(dateObj, 'getTicks', {
-    value: () => extra
+    value: () => extra || 0
   });
   return dateObj;
 }
